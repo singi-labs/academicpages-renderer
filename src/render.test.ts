@@ -168,6 +168,64 @@ describe('CSP nonce', () => {
   });
 });
 
+describe('sidebar icons', () => {
+  it('renders a pin icon before the location line', () => {
+    const html = renderHome({ ...PROFILE, locationCity: 'Rotterdam', locationCountry: 'NL' }, []);
+    expect(html).toContain('meta-location');
+    // teardrop map-pin path
+    expect(html).toContain('<svg class="meta-icon"');
+    expect(html).toContain('M12 21s7-5.686 7-11');
+  });
+
+  it('gives every sidebar link an inline icon and keeps the label', () => {
+    const html = renderHome(
+      {
+        ...PROFILE,
+        website: 'https://jane.example',
+        externalAccounts: [{ platform: 'github', url: 'https://github.com/jane' }],
+      },
+      [],
+    );
+    const links = html.match(/<a class="side-link"[^>]*>.*?<\/a>/g) ?? [];
+    expect(links.length).toBe(2);
+    for (const a of links) {
+      expect(a).toContain('side-link-icon');
+      expect(a).toContain('side-link-label');
+    }
+  });
+
+  it('uses the brand glyph for a known platform (github)', () => {
+    const html = renderHome(
+      { handle: 'j', externalAccounts: [{ platform: 'github', url: 'https://github.com/j' }] },
+      [],
+    );
+    expect(html).toContain('M12 .297c-6.63 0-12 5.373-12 12'); // github path
+  });
+
+  it('falls back to a globe for an unknown / custom-website platform', () => {
+    const html = renderHome({ handle: 'j', website: 'https://jane.example' }, []);
+    // globe uses stroked circle, not a brand fill path
+    expect(html).toContain('<circle cx="12" cy="12" r="9"');
+  });
+
+  it('loads icons inline only — no favicon service or per-domain favicon fetch', () => {
+    const html = renderHome(
+      {
+        handle: 'j',
+        website: 'https://jane.example',
+        externalAccounts: [{ platform: 'github', url: 'https://github.com/j' }],
+      },
+      [],
+    );
+    // No third-party favicon aggregator, no per-domain /favicon.ico fetch.
+    expect(html).not.toContain('duckduckgo');
+    expect(html).not.toContain('s2/favicons');
+    expect(html).not.toContain('/favicon.ico');
+    // The only icon markup is inline <svg>.
+    expect(html).toContain('<svg class="side-link-icon"');
+  });
+});
+
 describe('getCSS / CSS', () => {
   it('CSS is the default getCSS() output', () => {
     expect(CSS).toBe(getCSS());
@@ -300,9 +358,14 @@ describe('sidebar links: title instead of label + raw URL', () => {
       { ...PROFILE, externalAccounts: [{ label: 'My Blog', url: 'https://blog.example.com' }] },
       [],
     );
+    // No second line showing the raw URL host under the title.
     expect(html).not.toContain('side-link-host');
-    expect(html).not.toContain('side-link-label');
-    expect(html).toContain('<a class="side-link" href="https://blog.example.com" rel="me noopener" target="_blank">My Blog</a>');
+    // The title appears exactly once, inside a single label span.
+    expect(html.match(/My Blog/g)?.length).toBe(1);
+    expect(html).toContain(
+      '<a class="side-link" href="https://blog.example.com" rel="me noopener" target="_blank">',
+    );
+    expect(html).toContain('<span class="side-link-label">My Blog</span>');
   });
 
   it('falls back to a properly capitalized platform name when there is no custom label', () => {

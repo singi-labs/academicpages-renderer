@@ -78,12 +78,16 @@ a { color:var(--link); }
 .sidebar-name { font-size:1.25rem; margin:1rem 0 0; }
 .sidebar-handle { color:var(--muted); margin:0.1rem 0 0.4rem; font-size:0.9rem; }
 .meta-line { color:var(--muted); margin:0.15rem 0; font-size:0.92rem; }
+.meta-location { display:flex; align-items:center; gap:0.35rem; margin-top:0.5rem; }
+.meta-icon { flex:0 0 auto; opacity:0.75; }
 
 /* links shown as content in the sidebar */
 .side-links { display:flex; flex-direction:column; gap:0.15rem; margin-top:1rem; }
-.side-link { display:block; text-decoration:none; padding:0.4rem 0; border-top:1px solid var(--border); color:var(--fg); font-size:0.92rem; }
+.side-link { display:flex; align-items:center; gap:0.55rem; text-decoration:none; padding:0.4rem 0; border-top:1px solid var(--border); color:var(--fg); font-size:0.92rem; }
 .side-link:first-child { border-top:none; }
 .side-link:hover { color:var(--link); }
+.side-link-icon { flex:0 0 auto; width:16px; height:16px; opacity:0.8; }
+.side-link:hover .side-link-icon { opacity:1; }
 
 .main { padding:2rem 2.5rem 3rem; min-width:0; }
 .page-section[hidden] { display:none; }

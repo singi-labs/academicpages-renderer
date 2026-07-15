@@ -136,6 +136,38 @@ describe('renderSinglePage', () => {
   });
 });
 
+describe('CSP nonce', () => {
+  it('adds the nonce to every <script> tag in a single-page render', () => {
+    const html = renderSinglePage(PROFILE, [], { nonce: 'test-nonce-123' });
+    const scriptTags = html.match(/<script\b[^>]*>/g) ?? [];
+    // theme init (head), theme toggle, section-switching script.
+    expect(scriptTags.length).toBe(3);
+    for (const tag of scriptTags) {
+      expect(tag).toContain('nonce="test-nonce-123"');
+    }
+  });
+
+  it('adds the nonce to every <script> tag in a multi-page render', () => {
+    const html = renderHome(PROFILE, [], { nonce: 'abc' });
+    const scriptTags = html.match(/<script\b[^>]*>/g) ?? [];
+    expect(scriptTags.length).toBeGreaterThan(0);
+    for (const tag of scriptTags) {
+      expect(tag).toContain('nonce="abc"');
+    }
+  });
+
+  it('emits no nonce attribute when ctx.nonce is absent', () => {
+    expect(renderSinglePage(PROFILE, [])).not.toContain('nonce=');
+    expect(renderHome(PROFILE, [])).not.toContain('nonce=');
+  });
+
+  it('escapes the nonce value so it cannot break out of the attribute', () => {
+    const html = renderHome(PROFILE, [], { nonce: 'a"><script>x' });
+    expect(html).not.toContain('a"><script>x');
+    expect(html).toContain('nonce="a&quot;&gt;');
+  });
+});
+
 describe('getCSS / CSS', () => {
   it('CSS is the default getCSS() output', () => {
     expect(CSS).toBe(getCSS());

@@ -84,6 +84,14 @@ export interface RenderContext {
    * files aren't available.
    */
   singlePage?: boolean;
+  /**
+   * CSP nonce to stamp on every inline `<script>` this renderer emits (theme
+   * init, theme toggle, single-page nav). Required by server-rendered hosts
+   * whose Content-Security-Policy uses a nonce + `'strict-dynamic'`, which
+   * makes browsers ignore `'unsafe-inline'` and block any un-nonced inline
+   * script -- without it the nav and dark-mode toggle silently do nothing.
+   */
+  nonce?: string;
 }
 
 /** Path overrides for CSS, fonts, and static assets. */
@@ -334,6 +342,7 @@ function layout(opts: {
   const name = profile.displayName ?? handle ?? 'Profile';
   const year = ctx?.year ?? '';
   const updated = ctx?.updated ?? '';
+  const nonceAttr = ctx?.nonce ? ` nonce="${escapeHtml(ctx.nonce)}"` : '';
 
   return `<!doctype html>
 <html lang="en">
@@ -344,7 +353,7 @@ function layout(opts: {
   <link rel="icon" href="${paths.favicon}" type="image/svg+xml">
   <link rel="preconnect" href="https://cdn.bsky.app">
   <link rel="stylesheet" href="${paths.css}">${ogTags(ctx?.og)}
-  <script>(function(){try{var t=localStorage.getItem('theme');if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=t;}catch(e){}})();</script>
+  <script${nonceAttr}>(function(){try{var t=localStorage.getItem('theme');if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=t;}catch(e){}})();</script>
 </head>
 <body>
   ${masthead(sections, activeSlug, paths, ctx?.singlePage)}
@@ -371,15 +380,15 @@ ${main}
       <a href="https://github.com/singi-labs/sifa-academicpages">Self-host your own Sifa ID-driven page like this</a>
     </div>
   </footer>
-  <script>document.getElementById('theme-toggle').addEventListener('click',function(){var t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('theme',t);}catch(e){}});</script>${ctx?.singlePage ? singlePageScript() : ''}
+  <script${nonceAttr}>document.getElementById('theme-toggle').addEventListener('click',function(){var t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;try{localStorage.setItem('theme',t);}catch(e){}});</script>${ctx?.singlePage ? singlePageScript(nonceAttr) : ''}
 </body>
 </html>
 `;
 }
 
-function singlePageScript(): string {
+function singlePageScript(nonceAttr = ''): string {
   return `
-  <script>(function(){
+  <script${nonceAttr}>(function(){
     function activate(slug){
       document.querySelectorAll('.page-section').forEach(function(el){el.hidden=el.id!==slug;});
       document.querySelectorAll('.top-nav a').forEach(function(a){

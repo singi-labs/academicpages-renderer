@@ -21,29 +21,29 @@ import { marked } from 'marked';
 
 /** Minimal profile shape -- compatible with the SDK `Profile` type. */
 export interface AcademicProfile {
-  handle?: string;
-  displayName?: string;
-  headline?: string;
-  about?: string;
-  avatar?: string;
-  website?: string;
-  locationLocality?: string;
-  locationCity?: string;
-  locationRegion?: string;
-  locationCountry?: string;
+  handle?: string | null;
+  displayName?: string | null;
+  headline?: string | null;
+  about?: string | null;
+  avatar?: string | null;
+  website?: string | null;
+  locationLocality?: string | null;
+  locationCity?: string | null;
+  locationRegion?: string | null;
+  locationCountry?: string | null;
   externalAccounts?: Array<{
-    label?: string;
-    platform?: string;
-    url?: string;
-    verified?: boolean;
-  }>;
+    label?: string | null;
+    platform?: string | null;
+    url?: string | null;
+    verified?: boolean | null;
+  }> | null;
   /** Nested location object (some profiles use this shape). */
   location?: {
-    locality?: string;
-    city?: string;
-    region?: string;
-    country?: string;
-  };
+    locality?: string | null;
+    city?: string | null;
+    region?: string | null;
+    country?: string | null;
+  } | null;
 }
 
 /** A parsed markdown section (title + body). */

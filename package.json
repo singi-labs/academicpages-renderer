@@ -13,8 +13,7 @@
     "url": "https://github.com/singi-labs/sifa-academicpages/issues"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "keywords": [
     "academicpages",
@@ -48,6 +47,7 @@
   },
   "scripts": {
     "build": "tsup",
+    "prepare": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit",
     "changeset": "changeset",

@@ -1,4 +1,4 @@
-# @singi-labs/sifa-pages-renderer
+# @singi-labs/sifa-page-renderer
 
 Pure HTML renderer for personal sites driven by [Sifa](https://sifa.id) profile data, styled after [academicpages.github.io](https://academicpages.github.io/). No framework, no filesystem -- import and call.
 
@@ -23,8 +23,8 @@ publication citations). Each page has:
 
 ```javascript
 import { fetchProfile } from '@singi-labs/sifa-sdk/query/fetchers';
-import { buildProfileSections, renderHome, renderSectionPage } from '@singi-labs/sifa-pages-renderer';
-import { CSS } from '@singi-labs/sifa-pages-renderer/style';
+import { buildProfileSections, renderHome, renderSectionPage } from '@singi-labs/sifa-page-renderer';
+import { CSS } from '@singi-labs/sifa-page-renderer/style';
 
 // Fetch the structured profile from sifa.id
 const profile = await fetchProfile({ baseUrl: 'https://sifa.id' }, 'your-handle.bsky.social');
@@ -41,13 +41,13 @@ for (const section of sections) {
 }
 ```
 
-See [sifa-pages](https://github.com/singi-labs/sifa-pages) for a complete self-hosting scaffold.
+See [sifa-page](https://github.com/singi-labs/sifa-page) for a complete self-hosting scaffold.
 
 ### Server-rendered (Next.js, Fastify, etc.)
 
 ```typescript
-import { buildProfileSections, renderSinglePage } from '@singi-labs/sifa-pages-renderer';
-import { getCSS } from '@singi-labs/sifa-pages-renderer/style';
+import { buildProfileSections, renderSinglePage } from '@singi-labs/sifa-page-renderer';
+import { getCSS } from '@singi-labs/sifa-page-renderer/style';
 
 // Override asset paths for your hosting setup. renderSinglePage serves all
 // sections in one document with hash-based nav (#career, #education, ...).
@@ -116,14 +116,14 @@ Default stylesheet (equivalent to `getCSS()`).
 The package includes fonts and SVG logos under `static/`. Import them via the package exports:
 
 ```
-@singi-labs/sifa-pages-renderer/static/fonts/quattro-regular.woff2
-@singi-labs/sifa-pages-renderer/static/assets/sifa-logo.svg
+@singi-labs/sifa-page-renderer/static/fonts/quattro-regular.woff2
+@singi-labs/sifa-page-renderer/static/assets/sifa-logo.svg
 ```
 
 Or copy them to your build output:
 
 ```bash
-cp -r node_modules/@singi-labs/sifa-pages-renderer/static/* dist/
+cp -r node_modules/@singi-labs/sifa-page-renderer/static/* dist/
 ```
 
 ## Data requirements

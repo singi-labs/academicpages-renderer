@@ -1,13 +1,13 @@
-# @singi-labs/sifa-pages-renderer
+# @singi-labs/sifa-page-renderer
 
 ## 0.2.8
 
 ### Patch Changes
 
 - Renamed the package from `@singi-labs/academicpages-renderer` to
-  `@singi-labs/sifa-pages-renderer` (repo `academicpages-renderer` →
-  `sifa-pages-renderer`), and the self-host scaffold from `sifa-academicpages`
-  → `sifa-pages`. The "academic" naming was an artifact of the visual lineage
+  `@singi-labs/sifa-page-renderer` (repo `academicpages-renderer` →
+  `sifa-page-renderer`), and the self-host scaffold from `sifa-academicpages`
+  → `sifa-page`. The "academic" naming was an artifact of the visual lineage
   from academicpages.github.io, not a constraint on who the renderer is for
   (the layout is a general personal site). No API changes. The old package is
   deprecated on npm with a pointer to this one.

@@ -1,16 +1,16 @@
 {
-  "name": "@singi-labs/sifa-pages-renderer",
+  "name": "@singi-labs/sifa-page-renderer",
   "version": "0.2.8",
   "description": "Pure HTML renderer for personal sites driven by Sifa profile data. No framework, no filesystem -- import and call.",
   "license": "MIT",
   "type": "module",
-  "homepage": "https://github.com/singi-labs/sifa-pages",
+  "homepage": "https://github.com/singi-labs/sifa-page",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/singi-labs/sifa-pages-renderer.git"
+    "url": "git+https://github.com/singi-labs/sifa-page-renderer.git"
   },
   "bugs": {
-    "url": "https://github.com/singi-labs/sifa-pages/issues"
+    "url": "https://github.com/singi-labs/sifa-page/issues"
   },
   "publishConfig": {
     "access": "public"
@@ -19,7 +19,7 @@
     "sifa",
     "atproto",
     "personal-site",
-    "pages",
+    "page",
     "renderer"
   ],
   "files": [

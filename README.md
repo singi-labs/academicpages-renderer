@@ -162,8 +162,20 @@ that link on the home page and every section page too, set the
 `RenderContext` accepts an optional `activityStream` flag that injects the "Now"
 nav entry (masthead + mobile bottom nav) into `renderHome`, `renderSectionPage`,
 and `renderSinglePage`, linking to `now.html`. Pass `true` for the default "Now"
-label, or `{ label: 'Updates' }` to customize it. When omitted, the nav is
+label, or an `ActivityNavConfig` object to customize it. When omitted, the nav is
 byte-identical to a build without an activity page.
+
+`ActivityNavConfig` accepts:
+
+- `label` -- nav label + page title for the activity page. Default: `"Now"`.
+- `href` -- href for the "Now" nav entry (masthead + mobile bottom nav). Default:
+  `"now.html"`. Set this so a single-page host (e.g. sifa-web's
+  `page.sifa.id/{handle}` route, driven by `renderSinglePage`) can point "Now" at
+  a real per-handle URL such as `"/gui.do/now"` instead of the static file. May be
+  an absolute `http(s)` URL or a same-origin relative path; the value is validated
+  and escaped, and executable schemes like `javascript:` are rejected (falling
+  back to `"now.html"`). Active-state highlighting is keyed on the entry's slug
+  (`now`), so a custom href still highlights correctly on the activity page.
 
 ```javascript
 const ctx = { year: 2026, activityStream: true };
@@ -171,6 +183,10 @@ const indexHtml = renderHome(profile, sections, ctx);
 const careerHtml = renderSectionPage(profile, career, sections, ctx);
 const nowHtml = renderActivityPage(profile, sections, vms, ctx);
 // All three now share a nav with an active-on-now.html "Now" link.
+
+// Point "Now" at a per-handle URL (e.g. for a server-rendered single-page host):
+const hosted = { activityStream: { href: '/gui.do/now' } };
+const singleHtml = renderSinglePage(profile, sections, hosted);
 ```
 
 ### `parseSections(md: string): ParsedSection[]`

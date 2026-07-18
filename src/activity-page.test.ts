@@ -101,6 +101,24 @@ describe("renderActivityPage", () => {
     );
   });
 
+  it("points the Now nav at a custom href in top nav, bottom nav, and stays active", () => {
+    const html = renderActivityPage(PROFILE, SECTIONS, [vm()], {
+      activityStream: { href: "/gui.do/now" },
+    });
+    // Top nav: custom href, still active (active keyed on the "now" slug).
+    expect(topNav(html)).toContain(
+      '<a href="/gui.do/now" aria-current="page" class="active">Now</a>'
+    );
+    // Bottom nav: same custom href, still active + slug preserved.
+    const bnav = html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/);
+    expect(bnav).not.toBeNull();
+    expect(bnav![0]).toContain('href="/gui.do/now"');
+    expect(bnav![0]).toContain('data-slug="now"');
+    expect(bnav![0]).toContain("active");
+    // The default file link is gone.
+    expect(html).not.toContain('href="now.html"');
+  });
+
   it("forwards stream options (empty text) to renderActivityStream", () => {
     const html = renderActivityPage(PROFILE, SECTIONS, [], undefined, {
       emptyText: "Nothing yet.",
@@ -167,6 +185,49 @@ describe("activity nav flag: renderHome / renderSectionPage", () => {
     const b = renderHome(PROFILE, SECTIONS, { year: 2026 });
     expect(a).toBe(b);
     expect(a).not.toContain("now.html");
+  });
+
+  it("a custom href points the Now link at a per-handle URL in both navs", () => {
+    const withHref = renderHome(PROFILE, SECTIONS, {
+      activityStream: { href: "/gui.do/now" },
+    });
+    expect(topNav(withHref)).toContain('<a href="/gui.do/now">Now</a>');
+    const bnav = withHref.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/);
+    expect(bnav![0]).toContain('href="/gui.do/now"');
+    expect(withHref).not.toContain('href="now.html"');
+  });
+
+  it("an absolute http(s) custom href is honored", () => {
+    const withHref = renderHome(PROFILE, SECTIONS, {
+      activityStream: { href: "https://page.sifa.id/gui.do/now" },
+    });
+    expect(topNav(withHref)).toContain(
+      '<a href="https://page.sifa.id/gui.do/now">Now</a>'
+    );
+  });
+
+  it("with href unset the Now link is byte-identical to the default now.html", () => {
+    const defaultHref = renderHome(PROFILE, SECTIONS, {
+      year: 2026,
+      activityStream: true,
+    });
+    const emptyConfig = renderHome(PROFILE, SECTIONS, {
+      year: 2026,
+      activityStream: {},
+    });
+    // No href set => output is byte-identical to the boolean-true form.
+    expect(emptyConfig).toBe(defaultHref);
+    expect(emptyConfig).toContain('<a href="now.html">Now</a>');
+  });
+
+  it("neutralizes a javascript: / attribute-breakout href, falling back to now.html", () => {
+    const evil = renderHome(PROFILE, SECTIONS, {
+      activityStream: { href: 'javascript:alert(1)//"><script>bad()</script>' },
+    });
+    // The malicious scheme is rejected; falls back to the safe default.
+    expect(evil).not.toContain("javascript:alert(1)");
+    expect(evil).not.toContain("<script>bad()</script>");
+    expect(topNav(evil)).toContain('<a href="now.html">Now</a>');
   });
 
   it("bottom nav also carries the Now entry with an icon when flagged", () => {

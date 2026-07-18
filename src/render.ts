@@ -103,7 +103,8 @@ export interface RenderContext {
    * (masthead + mobile bottom nav) so the separate activity page rendered by
    * {@link renderActivityPage} is reachable from the home page and each section
    * page. Pass `true` for the default "Now" label, or an object to customize it.
-   * The entry links to `now.html` and is marked active only on the activity page.
+   * The entry links to `now.html` (override via {@link ActivityNavConfig.href})
+   * and is marked active only on the activity page.
    * When omitted, the nav is byte-identical to a build without an activity page.
    */
   activityStream?: boolean | ActivityNavConfig;
@@ -113,6 +114,17 @@ export interface RenderContext {
 export interface ActivityNavConfig {
   /** Nav label + page title for the activity page. Default: `"Now"`. */
   label?: string;
+  /**
+   * Href for the "Now" nav entry (masthead + mobile bottom nav). Defaults to
+   * the self-hosted `"now.html"` file. Set this so a single-page host (e.g.
+   * sifa-web's `page.sifa.id/{handle}` route) can point "Now" at a real
+   * per-handle URL such as `"/gui.do/now"` instead of the static file. May be
+   * an absolute `http(s)` URL or a same-origin relative path; validated and
+   * escaped (executable schemes like `javascript:` are rejected, falling back
+   * to `"now.html"`). Active-state highlighting is keyed on the entry's slug,
+   * so a custom href still highlights correctly on the activity page.
+   */
+  href?: string;
 }
 
 /** Path overrides for CSS, fonts, and static assets. */
@@ -292,6 +304,29 @@ interface NavEntry {
 }
 
 /**
+ * Validate + escape a caller-supplied "Now" nav href, returning an
+ * attribute-safe (already HTML-escaped) value, or `null` if it's unsafe.
+ *
+ * An absolute `http(s)` URL is validated and escaped via {@link safeUrl}.
+ * Otherwise the value is treated as a same-origin relative path (e.g.
+ * `"/gui.do/now"`), which `safeUrl` rejects because `new URL()` needs an
+ * absolute URL. For that case we reject any control characters and any scheme
+ * -- a `:` that appears before the first `/` -- which blocks `javascript:`,
+ * `data:`, etc., then HTML-escape so the value can't break out of the `href`
+ * attribute. `#hash` and `now.html`-style relative paths pass through.
+ */
+function safeNavHref(href: string): string | null {
+  const abs = safeUrl(href);
+  if (abs) return abs;
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001F\u007F]/.test(href)) return null;
+  const slash = href.indexOf("/");
+  const colon = href.indexOf(":");
+  if (colon !== -1 && (slash === -1 || colon < slash)) return null;
+  return escapeHtml(href);
+}
+
+/**
  * Resolve the optional activity-stream nav entry from the render context.
  * Returns `undefined` (no entry) unless `ctx.activityStream` is truthy, keeping
  * nav output byte-identical for builds without an activity page.
@@ -300,13 +335,18 @@ function activityNavEntry(ctx?: RenderContext): NavEntry | undefined {
   const cfg = ctx?.activityStream;
   if (!cfg) return undefined;
   const label = typeof cfg === "object" && cfg.label ? cfg.label : "Now";
+  // A caller can point "Now" at a real per-handle URL; when unset (or rejected
+  // as unsafe) fall back to the self-hosted `now.html` so output stays
+  // byte-identical to a build without a custom href.
+  const customHref =
+    typeof cfg === "object" && cfg.href ? safeNavHref(cfg.href) : null;
   // Always a real page link (never a single-page hash): the activity stream is
   // a separate route, not one of the in-document `.page-section` blocks.
   return {
     slug: ACTIVITY_SLUG,
     title: label,
     iconId: ACTIVITY_SLUG,
-    href: `${ACTIVITY_SLUG}.html`,
+    href: customHref ?? `${ACTIVITY_SLUG}.html`,
   };
 }
 

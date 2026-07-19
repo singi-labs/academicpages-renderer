@@ -1,5 +1,11 @@
 # @singi-labs/sifa-page-renderer
 
+## 0.2.19
+
+### Patch Changes
+
+- Match the Sifa profile's rich sections on the personal site: talk deliveries collapse into a one-line summary, Standard.site publications group into cards with an "Other publications" list, course-linked credentials link to their URL, and the sidebar identity link is labelled "Sifa ID" with the Sifa logo mark.
+
 ## 0.2.18
 
 ### Patch Changes

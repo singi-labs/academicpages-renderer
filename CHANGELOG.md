@@ -1,5 +1,11 @@
 # @singi-labs/sifa-page-renderer
 
+## 0.2.18
+
+### Patch Changes
+
+- ea3b23b: Add app icons to activity-stream cards: a top-left card icon (brand logo for recognized single-writer apps, else a category glyph) plus a category glyph in each source pill, mirroring sifa-web's `/activity`.
+
 ## 0.2.17
 
 ### Patch Changes

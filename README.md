@@ -189,6 +189,37 @@ const hosted = { activityStream: { href: '/gui.do/now' } };
 const singleHtml = renderSinglePage(profile, sections, hosted);
 ```
 
+### `ctx.profileHomeHref` -- point section links at the single-page home
+
+On a single-page host, the standalone activity page rendered by
+`renderActivityPage` lives at a nested route like `page.sifa.id/{handle}/now`.
+Its section nav (About/Career/…) would otherwise emit relative `career.html`
+links, which resolve to `page.sifa.id/{handle}/career.html` and 404. Set
+`ctx.profileHomeHref` to the single-page profile home so those links point back
+to it instead:
+
+- the About/index section links to `profileHomeHref` itself (e.g. `/gui.do`);
+- every other section with slug `S` links to `profileHomeHref` + `#` + `S`
+  (e.g. `/gui.do#career`).
+
+The rewrite applies to both the masthead and the mobile bottom nav. The "Now"
+activity entry keeps its own `activityStream.href` and active-state, and the
+masthead brand badge is untouched. Section active-state stays slug-based.
+
+Like `activityStream.href`, the value may be an absolute `http(s)` URL or a
+same-origin relative path; it is validated and escaped, and executable schemes
+like `javascript:` are rejected (falling back to the default section links).
+When omitted, the nav is byte-identical to today.
+
+```javascript
+const ctx = {
+  activityStream: { href: '/gui.do/now' },
+  profileHomeHref: '/gui.do',
+};
+const nowHtml = renderActivityPage(profile, sections, vms, ctx);
+// Section links now point at /gui.do and /gui.do#career; "Now" stays /gui.do/now.
+```
+
 ### `parseSections(md: string): ParsedSection[]`
 
 Parse a markdown string into `##`-keyed sections. Retained for consumers that

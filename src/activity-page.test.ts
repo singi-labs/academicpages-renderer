@@ -53,6 +53,13 @@ function topNav(html: string): string {
   return m[1];
 }
 
+/** Extract the mobile `.bottom-nav` markup (including the "More" sheet is not). */
+function bottomNav(html: string): string {
+  const m = html.match(/<nav class="bottom-nav"[\s\S]*?<\/nav>/);
+  if (!m) throw new Error("no bottom-nav found");
+  return m[0];
+}
+
 describe("renderActivityPage", () => {
   it("renders a full HTML document with the shared site layout", () => {
     const html = renderActivityPage(PROFILE, SECTIONS, [vm()], {
@@ -238,5 +245,71 @@ describe("activity nav flag: renderHome / renderSectionPage", () => {
     expect(m).not.toBeNull();
     expect(m![0]).toContain('data-slug="now"');
     expect(m![0]).toContain("<span>Now</span>");
+  });
+});
+
+describe("profileHomeHref: section links point back at the single-page home", () => {
+  it("rewrites section links to home + hash in both navs, Now unchanged and active", () => {
+    const html = renderActivityPage(PROFILE, SECTIONS, [vm()], {
+      activityStream: { href: "/gui.do/now" },
+      profileHomeHref: "/gui.do",
+    });
+
+    // Top nav: About (index) -> home root; Career -> home + #career.
+    expect(topNav(html)).toContain('<a href="/gui.do">About</a>');
+    expect(topNav(html)).toContain('<a href="/gui.do#career">Career</a>');
+    expect(topNav(html)).toContain('<a href="/gui.do#education">Education</a>');
+    // The "Now" entry keeps its own href and active state (slug "now").
+    expect(topNav(html)).toContain(
+      '<a href="/gui.do/now" aria-current="page" class="active">Now</a>'
+    );
+    // The self-hosted section files are gone.
+    expect(html).not.toContain('href="career.html"');
+    expect(html).not.toContain('href="index.html"');
+
+    // Bottom nav: same rewritten section hrefs + untouched Now.
+    const bnav = bottomNav(html);
+    expect(bnav).toContain('href="/gui.do"');
+    expect(bnav).toContain('href="/gui.do#career"');
+    expect(bnav).toContain('href="/gui.do/now"');
+    expect(bnav).toContain('data-slug="now"');
+    expect(bnav).toContain("active");
+  });
+
+  it("leaves the section nav byte-identical when profileHomeHref is unset", () => {
+    const baseline = renderActivityPage(PROFILE, SECTIONS, [vm()], {
+      year: 2026,
+      activityStream: { href: "/gui.do/now" },
+    });
+    const explicitUndefined = renderActivityPage(PROFILE, SECTIONS, [vm()], {
+      year: 2026,
+      activityStream: { href: "/gui.do/now" },
+      profileHomeHref: undefined,
+    });
+    // Passing the key as undefined must not perturb any byte of the document.
+    expect(explicitUndefined).toBe(baseline);
+    // And the default self-hosted section links remain.
+    expect(topNav(baseline)).toContain('<a href="career.html">Career</a>');
+  });
+
+  it("neutralizes a javascript: / attribute-breakout profileHomeHref", () => {
+    const evil = renderActivityPage(PROFILE, SECTIONS, [vm()], {
+      profileHomeHref: 'javascript:alert(1)//"><script>bad()</script>',
+    });
+    // Malicious scheme rejected; falls back to the default section links.
+    expect(evil).not.toContain("javascript:alert(1)");
+    expect(evil).not.toContain("<script>bad()</script>");
+    expect(topNav(evil)).toContain('<a href="career.html">Career</a>');
+  });
+
+  it("honors profileHomeHref in renderHome section links too", () => {
+    const html = renderHome(PROFILE, SECTIONS, {
+      profileHomeHref: "/gui.do",
+    });
+    expect(topNav(html)).toContain('<a href="/gui.do#career">Career</a>');
+    // About (index) is the active page here; it points at the home root.
+    expect(topNav(html)).toContain(
+      '<a href="/gui.do" aria-current="page" class="active">About</a>'
+    );
   });
 });

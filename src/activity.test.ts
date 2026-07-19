@@ -48,14 +48,14 @@ describe("renderActivityStream: common chrome", () => {
 });
 
 describe("renderActivityStream: app icons", () => {
-  it("gives a shared bsky post a category glyph card icon, not a brand logo", () => {
+  it("shows the category glyph only in the pill, with no separate top-left card icon", () => {
     const html = renderActivityStream([vm()], { now: NOW });
-    expect(html).toContain('class="stream-card-icon"');
-    // No bluesky brand logo is embedded, so it must not carry the popfeed mark.
-    expect(html).not.toContain("M 50,0 A 44,44");
+    // The glyph lives inside the source pill; there is no duplicate top-left icon.
+    expect(html).toContain('class="stream-source-glyph"');
+    expect(html).not.toContain('class="stream-card-icon"');
   });
 
-  it("gives a popfeed item a category-glyph card icon (no brand logos shipped)", () => {
+  it("carries the pill glyph for a popfeed item too (no brand logos shipped)", () => {
     const html = renderActivityStream(
       [
         vm({
@@ -64,9 +64,8 @@ describe("renderActivityStream: app icons", () => {
       ],
       { now: NOW }
     );
-    expect(html).toContain('class="stream-card-icon"');
-    // No brand marks are shipped, so the old popfeed path must not appear.
-    expect(html).not.toContain("M 50,0 A 44,44");
+    expect(html).toContain('class="stream-source-glyph"');
+    expect(html).not.toContain('class="stream-card-icon"');
   });
 
   it("renders a glyph before the app name inside the source pill", () => {

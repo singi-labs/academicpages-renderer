@@ -24,7 +24,7 @@ import type {
 } from "@singi-labs/sifa-sdk";
 import { formatRelativeTime, isValidRgbColor, rgbToString } from "@singi-labs/sifa-sdk";
 import { escapeHtml, safeUrl } from "./util.js";
-import { cardIcon, pillGlyph } from "./app-icons.js";
+import { pillGlyph } from "./app-icons.js";
 
 /** Default CDN base for the blob-URL builder. Matches the profile renderer's
  *  `<link rel="preconnect" href="https://cdn.bsky.app">`. */
@@ -131,11 +131,9 @@ function renderCard(
   depth: number
 ): string {
   const styleAttr = themeStyle(item.theme);
-  // App icon: brand logo for recognized single-writer apps, else a category
-  // glyph. Static SVG constants (no user data), so no escaping is needed.
-  const icon = `<span class="stream-card-icon" aria-hidden="true">${cardIcon(
-    item.source.appId
-  )}</span>`;
+  // The source pill carries the category glyph + app name; there is no separate
+  // top-left icon (it would just duplicate the pill glyph while no brand logos
+  // ship). The slot returns for real brand logos later.
   const source = `<span class="stream-source" data-color="${escapeHtml(
     item.source.color
   )}"><span class="stream-source-glyph" aria-hidden="true">${pillGlyph(
@@ -148,7 +146,7 @@ function renderCard(
   // the source pill + time, styled apart from the post body. A trailing
   // "View on {source}" link (when the VM carries a `sourceUrl`) opens the record
   // on its origin app in a new tab.
-  const head = `<div class="stream-head">${icon}${source}${renderVerb(
+  const head = `<div class="stream-head">${source}${renderVerb(
     item,
     ctx
   )}${time}${renderSourceLink(item)}</div>`;

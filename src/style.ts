@@ -212,8 +212,6 @@ a { color:var(--link); }
 }
 .stream-head { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.35rem; }
 /* App icon (brand logo or category glyph) at the card's top-left. */
-.stream-card-icon { flex:0 0 auto; display:inline-flex; color:var(--muted); }
-.stream-card-icon svg { width:24px; height:24px; display:block; }
 .stream-source {
   display:inline-flex; align-items:center; gap:0.3rem; font-size:0.74rem; font-weight:700;
   color:var(--muted); background:var(--bg); border:1px solid var(--border);

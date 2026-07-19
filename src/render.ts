@@ -108,6 +108,25 @@ export interface RenderContext {
    * When omitted, the nav is byte-identical to a build without an activity page.
    */
   activityStream?: boolean | ActivityNavConfig;
+  /**
+   * When set, rewrites the SECTION nav links (About/Career/…) to point back at
+   * the single-page profile home instead of the self-hosted `.html` files or
+   * in-document hashes. Intended for single-page hosts like sifa-web's
+   * `page.sifa.id/{handle}/now` activity route, where relative `career.html`
+   * links would resolve to `page.sifa.id/{handle}/career.html` and 404.
+   *
+   * The About/index section links to `profileHomeHref` itself (e.g. `/gui.do`);
+   * every other section with slug `S` links to `profileHomeHref` + `#` + `S`
+   * (e.g. `/gui.do#career`). Applied to both the masthead and mobile bottom nav.
+   * The "Now" activity entry (see {@link activityStream}) and the masthead brand
+   * badge are unaffected; section active-state is still slug-based.
+   *
+   * May be an absolute `http(s)` URL or a same-origin relative path; validated
+   * and escaped the same way as {@link ActivityNavConfig.href} (executable
+   * schemes like `javascript:` are rejected, falling back to the default
+   * section links). When omitted, the nav is byte-identical to today.
+   */
+  profileHomeHref?: string;
 }
 
 /** Nav configuration for the activity ("Now") page. */
@@ -354,17 +373,31 @@ function activityNavEntry(ctx?: RenderContext): NavEntry | undefined {
  * Build the ordered nav entries: the profile sections, then the optional
  * activity ("Now") entry. Section hrefs follow the single-page/hash convention;
  * the activity entry always links to its own page.
+ *
+ * When `profileHomeHref` is set (already validated + HTML-escaped by
+ * {@link safeNavHref}), the SECTION links instead point back at the single-page
+ * profile home: the index/About section → `profileHomeHref`; every other
+ * section with slug `S` → `profileHomeHref` + `#` + `S`. The slug is derived
+ * from {@link sectionSlug} (only `[a-z0-9-]`), so the combined value stays
+ * attribute-safe. The activity entry is untouched (it keeps its own href).
  */
 function navEntries(
   sections: RenderedSection[],
   singlePage?: boolean,
-  activity?: NavEntry
+  activity?: NavEntry,
+  profileHomeHref?: string
 ): NavEntry[] {
   const base = sections.map<NavEntry>((s) => ({
     slug: s.slug,
     title: s.title,
     iconId: s.id,
-    href: singlePage ? `#${s.slug}` : `${s.slug}.html`,
+    href: profileHomeHref
+      ? s.slug === "index"
+        ? profileHomeHref
+        : `${profileHomeHref}#${s.slug}`
+      : singlePage
+      ? `#${s.slug}`
+      : `${s.slug}.html`,
   }));
   return activity ? [...base, activity] : base;
 }
@@ -670,10 +703,17 @@ function layout(opts: {
   const year = ctx?.year ?? "";
   const updated = ctx?.updated ?? "";
   const nonceAttr = ctx?.nonce ? ` nonce="${escapeHtml(ctx.nonce)}"` : "";
+  // Validate + escape the optional single-page home href the same way as the
+  // "Now" href; a rejected (unsafe) value falls back to the default section
+  // links, keeping output byte-identical to a build without it.
+  const profileHomeHref = ctx?.profileHomeHref
+    ? (safeNavHref(ctx.profileHomeHref) ?? undefined)
+    : undefined;
   const entries = navEntries(
     sections,
     ctx?.singlePage,
-    activityNavEntry(ctx)
+    activityNavEntry(ctx),
+    profileHomeHref
   );
 
   return `<!doctype html>

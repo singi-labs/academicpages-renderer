@@ -48,14 +48,14 @@ describe("renderActivityStream: common chrome", () => {
 });
 
 describe("renderActivityStream: app icons", () => {
-  it("gives a shared bsky post a category glyph card icon, not a brand logo", () => {
+  it("shows the category glyph only in the pill, with no separate top-left card icon", () => {
     const html = renderActivityStream([vm()], { now: NOW });
-    expect(html).toContain('class="stream-card-icon"');
-    // No bluesky brand logo is embedded, so it must not carry the popfeed mark.
-    expect(html).not.toContain("M 50,0 A 44,44");
+    // The glyph lives inside the source pill; there is no duplicate top-left icon.
+    expect(html).toContain('class="stream-source-glyph"');
+    expect(html).not.toContain('class="stream-card-icon"');
   });
 
-  it("gives a popfeed item a category-glyph card icon (no brand logos shipped)", () => {
+  it("carries the pill glyph for a popfeed item too (no brand logos shipped)", () => {
     const html = renderActivityStream(
       [
         vm({
@@ -64,9 +64,8 @@ describe("renderActivityStream: app icons", () => {
       ],
       { now: NOW }
     );
-    expect(html).toContain('class="stream-card-icon"');
-    // No brand marks are shipped, so the old popfeed path must not appear.
-    expect(html).not.toContain("M 50,0 A 44,44");
+    expect(html).toContain('class="stream-source-glyph"');
+    expect(html).not.toContain('class="stream-card-icon"');
   });
 
   it("renders a glyph before the app name inside the source pill", () => {
@@ -241,6 +240,124 @@ describe("renderActivityStream: subject (repost/reply target)", () => {
       { now: NOW }
     );
     expect(html).toContain("alice.test");
+  });
+});
+
+describe("renderActivityStream: source link", () => {
+  it("renders a 'View on {source}' link to sourceUrl, opening in a new tab", () => {
+    const html = renderActivityStream(
+      [
+        vm({
+          sourceUrl: "https://bsky.app/profile/gui.do/post/abc",
+        }),
+      ],
+      { now: NOW }
+    );
+    expect(html).toContain('class="stream-source-link"');
+    expect(html).toContain(
+      'href="https://bsky.app/profile/gui.do/post/abc"'
+    );
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain('rel="noopener"');
+    expect(html).toContain("View on Bluesky");
+  });
+
+  it("renders no source link when the VM has no sourceUrl", () => {
+    const html = renderActivityStream([vm()], { now: NOW });
+    expect(html).not.toContain("stream-source-link");
+    expect(html).not.toContain("View on");
+  });
+
+  it("drops a javascript: sourceUrl rather than linking to it", () => {
+    const html = renderActivityStream(
+      [vm({ sourceUrl: "javascript:alert(1)" })],
+      { now: NOW }
+    );
+    expect(html).not.toContain("javascript:");
+    expect(html).not.toContain("stream-source-link");
+  });
+
+  it("escapes a quote-breakout attempt in sourceUrl", () => {
+    const html = renderActivityStream(
+      [vm({ sourceUrl: 'https://evil.test/"onmouseover="alert(1)' })],
+      { now: NOW }
+    );
+    expect(html).not.toContain('"onmouseover="alert(1)"');
+    expect(html).toContain("&quot;onmouseover=&quot;alert(1)");
+  });
+
+  it("links the nested subject card to its own sourceUrl", () => {
+    const html = renderActivityStream(
+      [
+        vm({
+          verb: "reposted",
+          title: "reposted",
+          subject: {
+            kind: "post",
+            post: vm({
+              uri: "at://did:plc:other/app.bsky.feed.post/9",
+              source: { appId: "popfeed", label: "Popfeed", color: "purple" },
+              sourceUrl: "https://popfeed.social/p/9",
+            }),
+          },
+        }),
+      ],
+      { now: NOW }
+    );
+    expect(html).toContain('href="https://popfeed.social/p/9"');
+    expect(html).toContain("View on Popfeed");
+  });
+});
+
+describe("renderActivityStream: reply vs repost embed", () => {
+  it("a reply (non-repost verb + post subject) renders a 'Replying to' label above the embedded OP", () => {
+    const html = renderActivityStream(
+      [
+        vm({
+          verb: "posted",
+          title: "replied on Bluesky",
+          subject: {
+            kind: "post",
+            post: vm({
+              uri: "at://did:plc:other/app.bsky.feed.post/9",
+              body: { kind: "text", text: "the original post" },
+            }),
+          },
+        }),
+      ],
+      { now: NOW }
+    );
+    expect(html).toContain('class="stream-reply-label"');
+    expect(html).toContain("Replying to");
+    // ...and the embedded original still renders inside the quoted subject box.
+    expect(html).toContain("stream-subject");
+    expect(html).toContain("the original post");
+    expect(html).toMatch(
+      /stream-reply-label[\s\S]*?<div class="stream-subject"/
+    );
+  });
+
+  it("a repost (verb 'reposted' + post subject) does NOT render a 'Replying to' label", () => {
+    const html = renderActivityStream(
+      [
+        vm({
+          verb: "reposted",
+          title: "reposted",
+          subject: {
+            kind: "post",
+            post: vm({
+              uri: "at://did:plc:other/app.bsky.feed.post/9",
+              body: { kind: "text", text: "the original post" },
+            }),
+          },
+        }),
+      ],
+      { now: NOW }
+    );
+    expect(html).not.toContain("stream-reply-label");
+    expect(html).not.toContain("Replying to");
+    // ...but the embedded post is still shown.
+    expect(html).toContain("the original post");
   });
 });
 

@@ -204,24 +204,29 @@ a { color:var(--link); }
 /* Activity heatmap header (mirrors sifa-web's /activity Activity Bar: month +
    weekday axes, per-app dominant colours via --app-<id>-stripe at the shared
    0.3 / 0.55 / 0.8 / 1.0 opacity ramp, and an app-colour legend). */
-.now-heatmap { margin:0 0 1.75rem; --hm-size:11px; --hm-gap:3px; }
+/* The grid is fluid: cells are square (aspect-ratio) and each week is a 1fr
+   column, so the calendar fills the available width. --hm-max caps how wide a
+   single cell can get on very wide containers. */
+.now-heatmap { margin:0 0 1.75rem; --hm-gap:4px; --hm-max:26px; }
 .heatmap-stats { display:flex; flex-wrap:wrap; align-items:center; gap:0.35rem 1.2rem; font-size:0.85rem; margin:0 0 0.7rem; }
 .heatmap-stat-total { font-weight:700; }
 .heatmap-stat-app, .heatmap-stat-count { color:var(--muted); }
-.heatmap-cal-scroll { overflow-x:auto; padding-bottom:0.2rem; }
-.heatmap-cal { display:grid; grid-template-columns:auto 1fr; grid-template-rows:auto auto; gap:4px 6px; width:max-content; }
+.heatmap-cal { display:grid; grid-template-columns:auto minmax(0,1fr); grid-template-rows:auto auto; gap:6px 8px; width:100%; max-width:calc(var(--hm-weeks,26) * (var(--hm-max) + var(--hm-gap)) + 2.75rem); }
 .heatmap-corner { grid-column:1; grid-row:1; }
-.heatmap-months { grid-column:2; grid-row:1; display:grid; grid-template-columns:repeat(var(--hm-weeks,26),var(--hm-size)); gap:0 var(--hm-gap); font-size:0.68rem; color:var(--muted); }
+.heatmap-months { grid-column:2; grid-row:1; display:grid; grid-template-columns:repeat(var(--hm-weeks,26),minmax(0,1fr)); gap:0 var(--hm-gap); font-size:0.7rem; color:var(--muted); }
 .heatmap-month { grid-row:1; white-space:nowrap; }
-.heatmap-weekdays { grid-column:1; grid-row:2; display:grid; grid-template-rows:repeat(7,var(--hm-size)); gap:var(--hm-gap); font-size:0.68rem; color:var(--muted); padding-right:2px; }
-.heatmap-weekday { line-height:var(--hm-size); white-space:nowrap; }
-.heatmap-grid { grid-column:2; grid-row:2; display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,var(--hm-size)); grid-auto-columns:var(--hm-size); gap:var(--hm-gap); }
-.heatmap-cell { width:var(--hm-size); height:var(--hm-size); border-radius:2px; background:var(--heatmap-empty, color-mix(in srgb, var(--fg) 8%, transparent)); }
+.heatmap-weekdays { grid-column:1; grid-row:2; display:grid; grid-template-rows:repeat(7,1fr); gap:var(--hm-gap); font-size:0.7rem; color:var(--muted); padding-right:4px; }
+.heatmap-weekday { display:flex; align-items:center; white-space:nowrap; }
+.heatmap-grid { grid-column:2; grid-row:2; display:grid; grid-auto-flow:column; grid-template-columns:repeat(var(--hm-weeks,26),minmax(0,1fr)); grid-template-rows:repeat(7,auto); gap:var(--hm-gap); }
+.heatmap-cell { position:relative; width:100%; aspect-ratio:1; border-radius:3px; background:var(--heatmap-empty, color-mix(in srgb, var(--fg) 8%, transparent)); }
 .heatmap-cell.heat-lvl-1 { background:color-mix(in srgb, var(--cell, var(--link)) 30%, transparent); }
 .heatmap-cell.heat-lvl-2 { background:color-mix(in srgb, var(--cell, var(--link)) 55%, transparent); }
 .heatmap-cell.heat-lvl-3 { background:color-mix(in srgb, var(--cell, var(--link)) 80%, transparent); }
 .heatmap-cell.heat-lvl-4 { background:var(--cell, var(--link)); }
 .heatmap-cell.heatmap-cell-future { background:transparent; }
+/* Styled hover tooltip (cross-browser; the native title tooltip was unreliable
+   on the tiny cells). white-space:pre keeps the per-app line breaks. */
+.heatmap-cell[data-tip]:hover::after { content:attr(data-tip); position:absolute; left:50%; bottom:calc(100% + 6px); transform:translateX(-50%); white-space:pre; z-index:20; background:var(--card); color:var(--fg); border:1px solid var(--border); border-radius:6px; padding:0.4rem 0.55rem; font-size:0.72rem; line-height:1.4; box-shadow:0 4px 16px rgba(0,0,0,0.18); pointer-events:none; }
 .heatmap-legend { display:flex; flex-wrap:wrap; align-items:center; gap:0.15rem 0.85rem; margin:0.6rem 0 0; font-size:0.75rem; color:var(--muted); }
 .heatmap-legend-item { display:inline-flex; align-items:center; gap:0.35rem; }
 .heatmap-legend-dot { width:0.5rem; height:0.5rem; border-radius:999px; background:var(--app-fallback-stripe); flex:none; }

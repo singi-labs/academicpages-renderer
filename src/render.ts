@@ -22,6 +22,7 @@ import { escapeHtml, safeUrl } from "./util.js";
 import { navIcon } from "./section-icons.js";
 import type { RenderedSection } from "./sections.js";
 import { renderActivityStream, type ActivityStreamOptions } from "./activity.js";
+import { renderHeatmap, type HeatmapDataInput } from "./heatmap.js";
 import type { StreamCardVM, SectionGroupId } from "@singi-labs/sifa-sdk";
 import { ALL_SECTIONS, SECTION_GROUPS } from "@singi-labs/sifa-sdk";
 
@@ -1041,12 +1042,14 @@ export function renderActivityPage(
   sections: RenderedSection[],
   vms: StreamCardVM[],
   ctx?: RenderContext,
-  streamOptions?: ActivityStreamOptions
+  streamOptions?: ActivityStreamOptions,
+  heatmap?: HeatmapDataInput | null
 ): string {
   const cfg = ctx?.activityStream;
   const label = typeof cfg === "object" && cfg.label ? cfg.label : "Now";
   const main = `
     <h2 class="page-title">${escapeHtml(label)}</h2>
+${renderHeatmap(heatmap)}
 ${renderActivityStream(vms, streamOptions)}
   `;
   return layout({
@@ -1082,3 +1085,10 @@ export {
   renderActivityStream,
   type ActivityStreamOptions,
 } from "./activity.js";
+export {
+  renderHeatmap,
+  countToLevel,
+  type HeatmapDataInput,
+  type HeatmapDayInput,
+  type RenderHeatmapOptions,
+} from "./heatmap.js";

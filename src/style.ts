@@ -198,6 +198,20 @@ a { color:var(--link); }
    changed. Per-item theme colors arrive as the inline custom properties
    --stream-card-bg / --stream-card-fg / --stream-accent, each falling back to
    the site tokens when absent. */
+/* Activity heatmap header (mirrors sifa-web's /activity Activity Bar: the four
+   intensity levels use --link at the same 0.3 / 0.55 / 0.8 / 1.0 opacities). */
+.now-heatmap { margin:0 0 1.75rem; }
+.heatmap-stats { display:flex; flex-wrap:wrap; align-items:center; gap:0.35rem 1.2rem; font-size:0.85rem; margin:0 0 0.7rem; }
+.heatmap-stat-total { font-weight:700; }
+.heatmap-stat-app, .heatmap-stat-count { color:var(--muted); }
+.heatmap-grid { display:grid; grid-auto-flow:column; grid-template-rows:repeat(7,1fr); gap:3px; overflow-x:auto; padding-bottom:0.2rem; }
+.heatmap-cell { width:11px; height:11px; border-radius:2px; background:var(--heatmap-empty, color-mix(in srgb, var(--fg) 8%, transparent)); }
+.heatmap-cell.heat-lvl-1 { background:color-mix(in srgb, var(--link) 30%, transparent); }
+.heatmap-cell.heat-lvl-2 { background:color-mix(in srgb, var(--link) 55%, transparent); }
+.heatmap-cell.heat-lvl-3 { background:color-mix(in srgb, var(--link) 80%, transparent); }
+.heatmap-cell.heat-lvl-4 { background:var(--link); }
+.heatmap-cell.heatmap-cell-future { background:transparent; }
+
 .activity-stream { display:flex; flex-direction:column; gap:1.75rem; margin:0.4rem 0 0; }
 .stream-empty { color:var(--muted); margin:0.4rem 0; }
 .stream-day { display:flex; flex-direction:column; gap:0.9rem; }

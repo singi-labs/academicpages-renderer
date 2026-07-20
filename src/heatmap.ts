@@ -198,8 +198,10 @@ export function renderHeatmap(
       const dominant = entry ? dominantAppId(entry.apps) : null;
       const colorStyle =
         level > 0 && dominant ? ` style="--cell:${appColorVar(dominant)}"` : "";
+      // `data-tip` drives a CSS hover tooltip (styled, cross-browser); the grid
+      // as a whole carries an accessible summary via role="img" + aria-label.
       cells.push(
-        `<div class="heatmap-cell heat-lvl-${level}"${colorStyle} title="${escapeHtml(title)}"></div>`
+        `<div class="heatmap-cell heat-lvl-${level}"${colorStyle} data-tip="${escapeHtml(title)}"></div>`
       );
     }
   }

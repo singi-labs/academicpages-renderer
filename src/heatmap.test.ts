@@ -82,6 +82,9 @@ describe("renderHeatmap", () => {
 
   it("gives active cells a per-app hover breakdown with the total", () => {
     const html = renderHeatmap(data(), { now: NOW });
+    // The breakdown drives a CSS hover tooltip via data-tip (not title).
+    expect(html).toContain("data-tip=");
+    expect(html).not.toContain(' title="');
     // 2026-07-14: one app (5 Bluesky), 5 total.
     expect(html).toContain("Jul 14, 2026");
     expect(html).toContain("5 Bluesky");

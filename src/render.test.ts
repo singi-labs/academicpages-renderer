@@ -251,7 +251,8 @@ describe("dev banner", () => {
     const keyCount = html.split("sifa-page-banner-dismissed").length - 1;
     expect(keyCount).toBe(2);
     // Every <script> tag, the two banner ones included, carries the nonce.
-    for (const tag of html.match(/<script[^>]*>/g) ?? []) {
+    // Case-insensitive so the match isn't a naive tag filter (CodeQL js/bad-tag-filter).
+    for (const tag of html.match(/<script[^>]*>/gi) ?? []) {
       expect(tag).toContain('nonce="n0"');
     }
   });

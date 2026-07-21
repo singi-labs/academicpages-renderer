@@ -906,7 +906,7 @@ ${main}
       <a href="https://sifa.id/p/${encodeURIComponent(
         handle
       )}">View ${escapeHtml(name)}'s full Sifa ID</a>
-      <a href="https://sifa.id">Start your own website for free</a>
+      <a href="https://docs.sifa.id/docs/personal-website/">Start your own website for free</a>
       <a href="https://github.com/singi-labs/sifa-page">Self-host your own Sifa ID-driven page like this</a>
     </div>
   </footer>

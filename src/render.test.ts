@@ -652,6 +652,15 @@ describe("sidebar: Sifa ID link + link ordering", () => {
   });
 });
 
+describe("footer links", () => {
+  it('points "Start your own website for free" at the personal-website docs', () => {
+    const html = renderHome(PROFILE, []);
+    expect(html).toContain(
+      '<a href="https://docs.sifa.id/docs/personal-website/">Start your own website for free</a>'
+    );
+  });
+});
+
 describe("sidebar links: title instead of label + raw URL", () => {
   it("renders a single title per link, no separate host/URL text", () => {
     const html = renderHome(
